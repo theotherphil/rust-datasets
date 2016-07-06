@@ -1,0 +1,8 @@
+[package]
+name = "datasets"
+version = "0.1.0"
+authors = ["Eric Platon <zaraki@gmx.com>"]
+
+[dependencies]
+hyper = '0.9.9'
+flate2 = { version = '0.2', features = ['zlib'], default-features = false }
