@@ -4,11 +4,13 @@
 // http://yann.lecun.com/exdb/mnist/
 //
 
+use std::convert::AsMut;
 use std::env;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::fs;
 use std::fs::File;
+use std::mem;
 use std::path::Path;
 
 use hyper::client::Client;
@@ -47,7 +49,7 @@ fn download_to(address: &str, destination: &str) {
 }
 
 fn decompress(archive: &str) -> Vec<u8> {
-    let mut archive = File::open(archive).unwrap();
+    let archive = File::open(archive).unwrap();
     let mut reader = BufReader::new(archive);
     let mut bytes = Vec::new();
     let _ = reader.read_to_end(&mut bytes).unwrap();
@@ -57,9 +59,48 @@ fn decompress(archive: &str) -> Vec<u8> {
     res
 }
 
+// Thanks to: http://stackoverflow.com/a/37682288/2050
+fn clone_into_array<A, T>(slice: &[T]) -> A
+    where A: Sized + Default + AsMut<[T]>,
+          T: Clone {
+        let mut a = Default::default();
+            <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
+                a
+}
+
 fn check_idx_integrity(data: Vec<u8>) -> bool {
-    // TODO
-    true
+    let magic;
+    unsafe {
+        magic = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[0..4])));
+    }
+    println!("Magic number: {}", magic);
+    if magic == 2051 {
+        check_idx_integrity_image(data)
+    } else if magic == 2049 {
+        check_idx_integrity_label(data)
+    } else {
+        false
+    }
+}
+
+fn check_idx_integrity_image(data: Vec<u8>) -> bool {
+    let (count, rows, cols);
+    unsafe {
+        count = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[4..8])));
+        rows = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[9..12])));
+        cols = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[12..16])));
+    }
+    println!("Image blob: {}x{}x{}", count, rows, cols);
+    (data.len() - 16) == ((count * rows * cols) as usize)
+}
+
+fn check_idx_integrity_label(data: Vec<u8>) -> bool {
+    let count;
+    unsafe {
+        count = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[4..8])));
+    }
+    println!("Label blob: {}", count);
+    (data.len() - 8) == (count as usize)
 }
 
 pub fn prepare() {
