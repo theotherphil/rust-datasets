@@ -26,7 +26,6 @@ fn data_home() -> String {
 }
 
 fn ensure_downloaded(address: &str) {
-    println!("Data home {}", data_home());
     let target = data_home() + address;
     if Path::new(&target).is_file() {
         println!("Already got {}", address);
@@ -63,9 +62,9 @@ fn decompress(archive: &str) -> Vec<u8> {
 fn clone_into_array<A, T>(slice: &[T]) -> A
     where A: Sized + Default + AsMut<[T]>,
           T: Clone {
-        let mut a = Default::default();
-            <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
-                a
+    let mut a: A = Default::default();
+    <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
+    a
 }
 
 fn check_idx_integrity(data: Vec<u8>) -> bool {
