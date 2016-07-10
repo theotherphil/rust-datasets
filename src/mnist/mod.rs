@@ -103,11 +103,15 @@ fn check_idx_integrity_label(data: Vec<u8>) -> bool {
 }
 
 pub fn prepare() {
-    let train_labels = "train-labels-idx1-ubyte.gz";
-    //let train_images = "train-images-idx3-ubyte.gz";
-    //let test_labels = "t10k-labels-idx1-ubyte.gz";
-    //let test_images = "t10k-images-idx3-ubyte.gz";
-    ensure_downloaded(train_labels);
+    let archives = [
+        "train-labels-idx1-ubyte.gz",
+        "train-images-idx3-ubyte.gz",
+        "t10k-labels-idx1-ubyte.gz",
+        "t10k-images-idx3-ubyte.gz"
+    ];
+    for a in archives.iter() {
+        ensure_downloaded(a);
+    }
     for res in fs::read_dir(data_home()).unwrap() {
         let entry = res.unwrap().path();
         let path = entry.to_str().unwrap();
