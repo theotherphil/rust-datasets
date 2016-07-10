@@ -86,7 +86,7 @@ fn check_idx_integrity_image(data: Vec<u8>) -> bool {
     let (count, rows, cols);
     unsafe {
         count = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[4..8])));
-        rows = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[9..12])));
+        rows = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[8..12])));
         cols = u32::from_be(mem::transmute::<[u8; 4], u32>(clone_into_array(&data[12..16])));
     }
     println!("Image blob: {}x{}x{}", count, rows, cols);
