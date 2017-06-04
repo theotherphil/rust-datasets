@@ -18,14 +18,10 @@ use store;
 static MNIST_NAME: &'static str = "MNIST";
 static MNIST_HOMEPAGE: &'static str = "http://yann.lecun.com/exdb/mnist/";
 
-fn ensure_downloaded(address: &str) {
-    let target = store::data_home(MNIST_NAME) + address;
-    if Path::new(&target).is_file() {
-        println!("Already got {}", address);
-    } else {
-        println!("Downloading {}", address);
-        store::download_to(&(MNIST_HOMEPAGE.to_owned() + address), &target);
-    }
+fn ensure_downloaded(file_name: &str) {
+    let address = MNIST_HOMEPAGE.to_owned() + file_name;
+    let destination = store::data_home(MNIST_NAME) + file_name;
+    store::ensure_downloaded(&address, &destination);
 }
 
 fn decompress(archive: &str) -> Vec<u8> {

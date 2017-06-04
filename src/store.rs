@@ -4,6 +4,7 @@ use std::env;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::Path;
 
 use hyper::client::Client;
 
@@ -14,6 +15,15 @@ pub fn data_home(dataset_name: &str) -> String {
         fs::create_dir(path.as_path());
     }
     String::from(path.to_str().unwrap())
+}
+
+pub fn ensure_downloaded(address: &str, destination: &str) {
+    if Path::new(&destination).is_file() {
+        println!("Already got {}", address);
+    } else {
+        println!("Downloading {}", address);
+        download_to(address, destination);
+    }
 }
 
 pub fn download_to(address: &str, destination: &str) {

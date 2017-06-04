@@ -5,7 +5,6 @@
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::fs::File;
-use std::path::Path;
 
 use tar::Archive;
 
@@ -14,15 +13,11 @@ use store;
 static CMU_FRONTAL_FACES_NAME: &'static str = "CMU_FRONTAL_FACES";
 static CMU_FRONTAL_FACES_HOMEPAGE: &'static str = "http://vasc.ri.cmu.edu/idb/images/face/frontal_images/";
 
-fn ensure_downloaded(address: &str) -> String {
-    let target = store::data_home(CMU_FRONTAL_FACES_NAME) + address;
-    if Path::new(&target).is_file() {
-        println!("Already got {}", address);
-    } else {
-        println!("Downloading {}", address);
-        store::download_to(&(CMU_FRONTAL_FACES_HOMEPAGE.to_owned() + address), &target);
-    }
-    target
+fn ensure_downloaded(file_name: &str) -> String {
+    let address = CMU_FRONTAL_FACES_HOMEPAGE.to_owned() + file_name;
+    let destination = store::data_home(CMU_FRONTAL_FACES_NAME) + file_name;
+    store::ensure_downloaded(&address, &destination);
+    destination
 }
 
 pub fn prepare() {
@@ -38,6 +33,3 @@ pub fn prepare() {
     let mut archive = Archive::new(File::open(downloaded_tar).unwrap());
     archive.unpack(tar_unpack_target).unwrap();
 }
-
-
-
