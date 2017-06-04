@@ -9,4 +9,5 @@ Supported Datasets
 ------------------
 
 * [MNIST Database of handwritten digits](http://yann.lecun.com/exdb/mnist/)
+* [CMU frontal face images](http://vasc.ri.cmu.edu//idb/html/face/frontal_images/index.html)
 

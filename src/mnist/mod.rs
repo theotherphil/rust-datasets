@@ -1,11 +1,9 @@
-//
-// The MNIST database of handrwritten digits.
-//
-// http://yann.lecun.com/exdb/mnist/
-//
+//! The MNIST database of handwritten digits.
+//!
+//! http://yann.lecun.com/exdb/mnist/
+//!
 
 use std::convert::AsMut;
-use std::env;
 use std::io::BufReader;
 use std::io::prelude::*;
 use std::fs;
@@ -13,38 +11,21 @@ use std::fs::File;
 use std::mem;
 use std::path::Path;
 
-use hyper::client::Client;
 use flate2::read::GzDecoder;
 
-fn data_home() -> String {
-    let mut path = env::current_dir().unwrap();
-    path.push("data/");
-    if ! path.is_dir() {
-        fs::create_dir(path.as_path());
-    }
-    String::from(path.to_str().unwrap())
-}
+use store;
+
+static MNIST_NAME: &'static str = "MNIST";
+static MNIST_HOMEPAGE: &'static str = "http://yann.lecun.com/exdb/mnist/";
 
 fn ensure_downloaded(address: &str) {
-    let target = data_home() + address;
+    let target = store::data_home(MNIST_NAME) + address;
     if Path::new(&target).is_file() {
         println!("Already got {}", address);
     } else {
         println!("Downloading {}", address);
-        let mnist_home = String::from("http://yann.lecun.com/exdb/mnist/");
-        download_to(&(mnist_home + address), &target);
+        store::download_to(&(MNIST_HOMEPAGE.to_owned() + address), &target);
     }
-}
-
-fn download_to(address: &str, destination: &str) {
-    let client = Client::new();
-    println!("Getting {}", address);
-    let mut archive = client.get(address).send().unwrap();
-    let mut body = Vec::new();
-    archive.read_to_end(&mut body);
-    println!("Saving to {}", destination);
-    let mut f = File::create(destination).unwrap();
-    f.write_all(&body);
 }
 
 fn decompress(archive: &str) -> Vec<u8> {
@@ -112,7 +93,7 @@ pub fn prepare() {
     for a in archives.iter() {
         ensure_downloaded(a);
     }
-    for res in fs::read_dir(data_home()).unwrap() {
+    for res in fs::read_dir(store::data_home(MNIST_NAME)).unwrap() {
         let entry = res.unwrap().path();
         let path = entry.to_str().unwrap();
         println!("Processing {}", path);
